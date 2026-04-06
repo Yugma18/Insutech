@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "rm -rf client/node_modules server/node_modules && npm install --prefix client && npm run build --prefix client && npm install --prefix server && npm run db:push --prefix server",
-    "start": "npm start --prefix server"
+    "build": "rm -rf client/node_modules server/node_modules && npm install --prefix client && npm run build --prefix client && npm install --prefix server",
+    "start": "npm run db:push --prefix server && npm start --prefix server"
   }
 }
