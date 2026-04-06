@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum InsurerCategory {
+  PVT
+  PSU
+}
+
+enum PlanType {
+  INDIVIDUAL
+  FAMILY_FLOATER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  CONVERTED
+  DROPPED
+}
+
+enum PolicyStatus {
+  PENDING
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model Insurer {
+  id          String          @id @default(uuid())
+  name        String          @unique
+  category    InsurerCategory
+  logoUrl     String?
+  description String?
+  isActive    Boolean         @default(true)
+  plans       Plan[]
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model Plan {
+  id            String        @id @default(uuid())
+  insurerId     String
+  insurer       Insurer       @relation(fields: [insurerId], references: [id], onDelete: Cascade)
+  name          String
+  planType      PlanType
+  variant       String?
+  minSumInsured Int
+  maxSumInsured Int
+  minEntryAge   Int
+  maxEntryAge   Int
+  isActive      Boolean       @default(true)
+  features      PlanFeature[]
+  premiums      Premium[]
+  policies      Policy[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model PlanFeature {
+  id              String @id @default(uuid())
+  planId          String
+  plan            Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  featureKey      String
+  featureLabel    String
+  featureValue    String
+  featureCategory String
+  displayOrder    Int    @default(0)
+
+  @@unique([planId, featureKey])
+}
+
+model Premium {
+  id            String @id @default(uuid())
+  planId        String
+  plan          Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  ageGroup      Int
+  familyConfig  String
+  sumInsured    Int
+  annualPremium Int
+}
+
+model Lead {
+  id                   String     @id @default(uuid())
+  name                 String
+  email                String?
+  phone                String     @unique
+  dateOfBirth          DateTime?
+  age                  Int?
+  gender               Gender?
+  planTypeInterest     PlanType?
+  numFamilyMembers     Int?
+  sumInsuredPreference Int?
+  city                 String?
+  isSmoker             Boolean    @default(false)
+  hasDiabetes          Boolean    @default(false)
+  hasBP                Boolean    @default(false)
+  hasHeartCondition    Boolean    @default(false)
+  hasThyroid           Boolean    @default(false)
+  hasCancerHistory     Boolean    @default(false)
+  hasKidneyDisease     Boolean    @default(false)
+  hasOtherCondition    Boolean    @default(false)
+  otherConditionDetail String?
+  status               LeadStatus @default(NEW)
+  notes                String?
+  recommendedPlanIds   String?
+  visitCount           Int        @default(1)
+  lastVisitAt          DateTime   @default(now())
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+}
+
+model Admin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+}
+
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  phone        String    @unique
+  passwordHash String
+  dateOfBirth  DateTime?
+  gender       Gender?
+  city         String?
+  policies     Policy[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Policy {
+  id            String       @id @default(uuid())
+  userId        String
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId        String
+  plan          Plan         @relation(fields: [planId], references: [id])
+  policyNumber  String       @unique
+  status        PolicyStatus @default(PENDING)
+  sumInsured    Int
+  annualPremium Int
+  familyConfig  String
+  startDate     DateTime?
+  endDate       DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}

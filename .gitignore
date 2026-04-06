@@ -1,0 +1,23 @@
+node_modules/
+
+# Environment files — set these in Railway's Variables panel
+server/.env
+client/.env
+client/.env.local
+client/.env.production
+
+# Build output
+client/dist/
+
+# Uploads (use Cloudinary in production)
+server/public/uploads/
+
+# Misc
+*.xlsx
+.DS_Store
+
+#claude
+CLAUDE.md
+.claude
+
+PROJECT_PLAN.md
